@@ -7,7 +7,7 @@
 #import <CoreText/CoreText.h>
 
 
-static CGFloat const DEFAULT_FONT_SIZE = 12;
+static CGFloat const DEFAULT_FONT_SIZE = 20;
 
 @implementation LxAppleOfficialFontManager
 
@@ -19,11 +19,11 @@ static CGFloat const DEFAULT_FONT_SIZE = 12;
     return font && ([font.fontName isEqualToString:fontName] || [font.familyName isEqualToString:fontName]);
 }
 
-+ (NSArray *)downloadableAvailableFontDescriptors
++ (NSArray *)availableAppleFontDescriptors
 {
-    NSDictionary * attributes = @{(id)kCTFontDownloadableAttribute:@YES};
-    CTFontDescriptorRef descriptor = CTFontDescriptorCreateWithAttributes((CFDictionaryRef)attributes);
-    CFArrayRef fontDescriptors = CTFontDescriptorCreateMatchingFontDescriptors(descriptor, 0);
+    NSDictionary * fontDownloadableAttribute = @{(id)kCTFontDownloadableAttribute:@YES};
+    CTFontDescriptorRef fontDescriptor = CTFontDescriptorCreateWithAttributes((CFDictionaryRef)fontDownloadableAttribute);
+    CFArrayRef fontDescriptors = CTFontDescriptorCreateMatchingFontDescriptors(fontDescriptor, 0);
     return (__bridge NSArray *)fontDescriptors;
 }
 
@@ -34,14 +34,8 @@ static CGFloat const DEFAULT_FONT_SIZE = 12;
 {
     NSCAssert([fontName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length > 0, @"LxAppleOfficialFontManager: Parameter fontName cannot be empty!");
     
-    if ([self existsFontNamed:fontName]) {
-        NSLog(@"LxAppleOfficialFontManager: Font %@ is already exists!", fontName);
-        finished([UIFont fontWithName:fontName size:DEFAULT_FONT_SIZE]);
-    }
-    
-    CTFontDescriptorRef fontDescriptor = CTFontDescriptorCreateWithAttributes((__bridge CFDictionaryRef)@{(NSString *)kCTFontAttributeName:fontName});
-    NSArray * fontDescriptors = @[(__bridge id)fontDescriptor];
-    CFRelease(fontDescriptor);
+    UIFontDescriptor * fontDescriptor = [UIFontDescriptor fontDescriptorWithName:fontName size:DEFAULT_FONT_SIZE];
+    NSArray * fontDescriptors = @[fontDescriptor];
     
     CTFontDescriptorMatchFontDescriptorsWithProgressHandler((__bridge CFArrayRef)fontDescriptors, 0, ^bool(CTFontDescriptorMatchingState state, CFDictionaryRef progressParameter) {
         
@@ -54,7 +48,14 @@ static CGFloat const DEFAULT_FONT_SIZE = 12;
             case kCTFontDescriptorMatchingDidFinish:
             {
                 NSLog(@"LxAppleOfficialFontManager: Font %@ matching finished!", fontName);
-                finished([UIFont fontWithName:fontName size:DEFAULT_FONT_SIZE]);
+                
+                NSDictionary * progressParameterDict = (__bridge NSDictionary *)progressParameter;
+                NSArray * fontDescriptorMatchingResultArray = progressParameterDict[(id)kCTFontDescriptorMatchingResult];
+                UIFontDescriptor * fontDescriptor = fontDescriptorMatchingResultArray.firstObject;
+                NSString * downloadedFontName = fontDescriptor.fontAttributes[UIFontDescriptorNameAttribute];
+                if (finished) {
+                    finished([UIFont fontWithName:downloadedFontName size:DEFAULT_FONT_SIZE]);
+                }                
             }
                 break;
             case kCTFontDescriptorMatchingWillBeginQuerying:
@@ -77,7 +78,9 @@ static CGFloat const DEFAULT_FONT_SIZE = 12;
                 double progressPercentage = [[(__bridge NSDictionary *)progressParameter objectForKey:(id)kCTFontDescriptorMatchingPercentage] doubleValue];
                 
                 NSLog(@"LxAppleOfficialFontManager: Font %@ matching is being download with progress %.2f%%!", fontName, progressPercentage);
-                progress((CGFloat)progressPercentage);
+                if (progress) {
+                    progress((CGFloat)progressPercentage);
+                }
             }
                 break;
             case kCTFontDescriptorMatchingDidFinishDownloading:
@@ -94,7 +97,9 @@ static CGFloat const DEFAULT_FONT_SIZE = 12;
             {
                 NSError * error = [(__bridge NSDictionary *)progressParameter valueForKey:(id)kCTFontDescriptorMatchingError];
                 NSLog(@"LxAppleOfficialFontManager: Font %@ download failed because of %@!", fontName, error);
-                failed(error);
+                if (failed) {
+                    failed(error);
+                }
             }
                 break;
             default:

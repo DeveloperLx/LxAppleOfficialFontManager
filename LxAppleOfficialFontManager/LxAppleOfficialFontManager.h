@@ -9,7 +9,7 @@
 @interface LxAppleOfficialFontManager : NSObject
 
 + (BOOL)existsFontNamed:(NSString *)fontName;
-+ (NSArray *)downloadableAvailableFontDescriptors;
++ (NSArray *)availableAppleFontDescriptors;
 + (void)downloadFontNamed:(NSString *)fontName
                  progress:(void (^)(CGFloat progress))progress
                  finished:(void (^)(UIFont * font))finished
