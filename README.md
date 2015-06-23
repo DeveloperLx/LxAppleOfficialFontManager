@@ -3,7 +3,7 @@
 ######	Fetch graceful font from apple official handily!
 ---
 ###	Installation
-	You only need drag LxKeychain.h and LxKeychain.m to your project.
+	You only need drag LxAppleOfficialFontManager.h and LxAppleOfficialFontManager.m to your project.
 ###	Support	
 	Minimum support iOS version: iOS 7.0
 ###	Usage
@@ -38,4 +38,4 @@
      }];
 ---
 ###	License
-LxLabel is available under the Apache License 2.0. See the LICENSE file for more info.
+LxAppleOfficialFontManager is available under the Apache License 2.0. See the LICENSE file for more info.

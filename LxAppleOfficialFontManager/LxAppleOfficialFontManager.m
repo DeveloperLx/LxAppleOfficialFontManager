@@ -22,8 +22,8 @@ static CGFloat const DEFAULT_FONT_SIZE = 20;
 + (NSArray *)availableAppleFontDescriptors
 {
     NSDictionary * fontDownloadableAttribute = @{(id)kCTFontDownloadableAttribute:@YES};
-    CTFontDescriptorRef fontDescriptor = CTFontDescriptorCreateWithAttributes((CFDictionaryRef)fontDownloadableAttribute);
-    CFArrayRef fontDescriptors = CTFontDescriptorCreateMatchingFontDescriptors(fontDescriptor, 0);
+    UIFontDescriptor * fontDescriptor = [UIFontDescriptor fontDescriptorWithFontAttributes:fontDownloadableAttribute];
+    CFArrayRef fontDescriptors = CTFontDescriptorCreateMatchingFontDescriptors((CTFontDescriptorRef)fontDescriptor, 0);
     return (__bridge NSArray *)fontDescriptors;
 }
 
